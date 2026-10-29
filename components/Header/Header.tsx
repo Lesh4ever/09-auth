@@ -1,7 +1,7 @@
-import css from "./Header.module.css";
-import Link from "next/link";
-import TagsMenu from "@/components/TagsMenu/TagsMenu";
-import AuthNavigation from "../AuthNavigation/AuthNavigation";
+import Link from 'next/link';
+import css from './Header.module.css';
+import TagsMenu from '../TagsMenu/TagsMenu';
+import AuthNavigation from '../AuthNavigation/AuthNavigation';
 
 export default function Header() {
   return (
@@ -17,7 +17,7 @@ export default function Header() {
           <li>
             <TagsMenu />
           </li>
-          <AuthNavigation />
+            <AuthNavigation />
         </ul>
       </nav>
     </header>

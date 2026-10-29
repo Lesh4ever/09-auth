@@ -1,9 +1,10 @@
-"use client";
-import { register, RegisterRequest, getMe } from "@/lib/api/clientApi";
-import css from "./singUpPage.module.css";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useAuthStore } from "@/lib/store/authStore";
+'use client';
+import { register, RegisterRequest, getMe } from '@/lib/api/clientApi';
+import css from './SingUpPage.module.css';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useAuthStore } from '@/lib/store/authStore';
+
 
 export default function Register() {
   const router = useRouter();
@@ -17,14 +18,14 @@ export default function Register() {
       const user = await getMe();
       if (res.email) {
         setUser(user);
-        router.push("/profile");
+        router.push('/profile');
       } else if (res.message) {
         setError(res.message);
       } else {
-        setError("Invalid email or password");
+        setError('Invalid email or password');
       }
     } catch {
-      setError("Invalid email or password");
+      setError('Invalid email or password');
     }
   };
 
@@ -34,24 +35,12 @@ export default function Register() {
         <h1 className={css.formTitle}>Sign up</h1>
         <div className={css.formGroup}>
           <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            className={css.input}
-            required
-          />
+          <input id="email" type="email" name="email" className={css.input} required />
         </div>
 
         <div className={css.formGroup}>
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            className={css.input}
-            required
-          />
+          <input id="password" type="password" name="password" className={css.input} required />
         </div>
 
         <div className={css.actions}>

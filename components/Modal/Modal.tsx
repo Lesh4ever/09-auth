@@ -2,6 +2,7 @@ import css from "./Modal.module.css";
 import { createPortal } from "react-dom";
 import { useEffect } from "react";
 
+
 interface NoteModalProps {
   onClose: () => void;
   children: React.ReactNode;
@@ -13,6 +14,7 @@ export default function NoteModal({ onClose, children }: NoteModalProps) {
       onClose();
     }
   };
+
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -31,13 +33,10 @@ export default function NoteModal({ onClose, children }: NoteModalProps) {
   }, [onClose]);
 
   return createPortal(
-    <div
-      onClick={handleBackdropClick}
-      className={css.backdrop}
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className={css.modal}>{children}</div>
+    <div onClick={handleBackdropClick} className={css.backdrop} role="dialog" aria-modal="true">
+      <div className={css.modal}>
+        {children}
+      </div>
     </div>,
     document.body
   );

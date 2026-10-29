@@ -1,3 +1,5 @@
-export default function Loading() {
-  return <p>Loading, please wait...</p>;
+export default function Loader() {
+    return (
+        <p className="loading">Loading, please wait...</p>
+    )
 }

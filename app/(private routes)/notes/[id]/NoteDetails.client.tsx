@@ -1,9 +1,9 @@
-"use client";
-import css from "./NoteDetails.module.css";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { fetchNoteById } from "@/lib/api/clientApi";
-import { useRouter } from "next/navigation";
+'use client';
+import css from './NoteDetails.module.css';
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
+import { fetchNoteById } from '@/lib/api/clientApi';
+import { useRouter } from 'next/navigation';
 
 export default function NoteDetailsClient() {
   const { id } = useParams<{ id: string }>();
@@ -14,7 +14,7 @@ export default function NoteDetailsClient() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["Note", parseInt(id)],
+    queryKey: ['Note', parseInt(id)],
     queryFn: () => fetchNoteById(id),
     refetchOnMount: false,
   });
@@ -32,9 +32,7 @@ export default function NoteDetailsClient() {
       <div className={css.item}>
         <div className={css.header}>
           <h2>{note.title}</h2>
-          <button onClick={back()} className={css.backBtn}>
-            Back
-          </button>
+          <button onClick={back()} className={css.backBtn}>Back</button>
         </div>
         <p className={css.content}>{note.content}</p>
         <p className={css.date}>{formattedDate}</p>

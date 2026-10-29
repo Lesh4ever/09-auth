@@ -1,4 +1,4 @@
-import { type Note } from "@/types/note";
+import {type Note} from "@/types/note";
 import css from "./NoteList.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { removeNote } from "@/lib/api/clientApi";
@@ -17,7 +17,7 @@ export default function NoteList({ notes }: NoteListProps) {
         queryKey: ["Notes"],
       });
     },
-  });
+    });
   return (
     <ul className={css.list}>
       {notes.map((note) => {
@@ -27,9 +27,7 @@ export default function NoteList({ notes }: NoteListProps) {
             <p className={css.content}>{note.content}</p>
             <div className={css.footer}>
               <span className={css.tag}>{note.tag}</span>
-              <Link className={css.link} href={`/notes/${note.id}`}>
-                View details
-              </Link>
+              <Link className={css.link} href={`/notes/${note.id}`}>View details</Link>
               <button
                 onClick={() => deleteNote.mutate(note.id.toString())}
                 className={css.button}

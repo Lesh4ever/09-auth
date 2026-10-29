@@ -1,40 +1,39 @@
-import Image from "next/image";
-import css from "./ProfilePage.module.css";
-import Link from "next/link";
-import { type Metadata } from "next";
-import { getMe } from "@/lib/api/serverApi";
+import Image from 'next/image';
+import css from './ProfilePage.module.css';
+import Link from 'next/link';
+import { type Metadata } from 'next';
+import { getMe } from '@/lib/api/serverApi';
 
 export async function generateMetadata(): Promise<Metadata> {
   const user = await getMe();
   return {
     title: `NoteHub - ${user.username}`,
-    description:
-      "Take notes, organize tasks, and collaborate effortlessly. Your all-in-one digital notebook.",
+    description: "Take notes, organize tasks, and collaborate effortlessly. Your all-in-one digital notebook.",
     icons: {
-      icon: "/favicon.svg",
+      icon: '/favicon.svg',
     },
     openGraph: {
       title: `NoteHub - ${user.username}`,
-      description:
-        "Take notes, organize tasks, and collaborate effortlessly. Your all-in-one digital notebook.",
+      description: "Take notes, organize tasks, and collaborate effortlessly. Your all-in-one digital notebook.",
       url: "https://09-auth-nu.vercel.app/profile",
-      siteName: "NoteHub",
+      siteName: 'NoteHub',
       images: [
         {
-          url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
+          url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
           width: 1200,
           height: 630,
           alt: "NoteHub",
         },
       ],
-      type: "article",
+      type: 'article',
     },
   };
 }
 
+
 export default async function Profile() {
   const user = await getMe();
-  const avatarUrl = user ? user.avatar : "/avatar.webp";
+  const avatarUrl = user ? user.avatar : '/avatar.webp';
   return (
     <main className={css.mainContent}>
       <div className={css.profileCard}>

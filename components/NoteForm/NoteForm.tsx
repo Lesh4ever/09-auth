@@ -1,23 +1,19 @@
-"use client";
-
-import { useState } from "react";
-import * as Yup from "yup";
-import { useRouter } from "next/navigation";
-import { useNoteDraftStore } from "@/lib/store/noteStore";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { createNote } from "@/lib/api/clientApi";
-import { type NoteFormData } from "@/types/note";
-import css from "./NoteForm.module.css";
-
+'use client';
+import { useState } from 'react';
+import css from './NoteForm.module.css';
+import { type NoteFormData } from '@/types/note';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { createNote } from '@/lib/api/clientApi';
+import { useRouter } from 'next/navigation';
+import * as Yup from 'yup';
+import { useNoteDraftStore } from '@/lib/store/noteStore';
 const NoteFormSchema = Yup.object().shape({
   title: Yup.string()
-    .min(3, "Too short title, min 3 symbols")
-    .max(50, "Too long title, max 50 symbols")
-    .required("Title is required"),
-  content: Yup.string().max(500, "Too long content, max 500 symbols"),
-  tag: Yup.string()
-    .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
-    .required("Tag is required"),
+    .min(3, 'Too short title, min 3 symbols')
+    .max(50, 'Too long title, max 50 symbols')
+    .required('Title is required'),
+  content: Yup.string().max(500, 'Too long content, max 500 symbols'),
+  tag: Yup.string().oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping']),
 });
 
 export default function NoteForm() {
@@ -26,24 +22,20 @@ export default function NoteForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { draft, setDraft, clearDraft } = useNoteDraftStore();
-
   const addNewNote = useMutation({
     mutationFn: (newNoteData: NoteFormData) => createNote(newNoteData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["Notes"] });
+      queryClient.invalidateQueries({ queryKey: ['Notes'] });
       clearDraft();
       router.back();
-    },
-    onSettled: () => {
-      setIsSubmitting(false);
+      localStorage.removeItem('note draft');
     },
   });
 
+  const { draft, setDraft, clearDraft } = useNoteDraftStore();
+
   const handleChange = (
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setDraft({ ...draft, [event.target.name]: event.target.value });
   };
@@ -51,10 +43,11 @@ export default function NoteForm() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrors({});
+    const formData = new FormData(event.currentTarget);
     const values: NoteFormData = {
-      title: draft.title,
-      content: draft.content,
-      tag: draft.tag,
+      title: formData.get('title') as string,
+      content: formData.get('content') as string,
+      tag: formData.get('tag') as 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping',
     };
 
     try {
@@ -71,7 +64,7 @@ export default function NoteForm() {
         });
         setErrors(newErrors);
       } else {
-        console.error("Unexpected error:", err);
+        console.error('Unexpected error:', err);
       }
     }
   };
@@ -84,7 +77,7 @@ export default function NoteForm() {
           id="title"
           type="text"
           name="title"
-          value={draft.title}
+          defaultValue={draft?.title}
           className={css.input}
           onChange={handleChange}
         />
@@ -94,7 +87,7 @@ export default function NoteForm() {
       <div className={css.formGroup}>
         <label htmlFor="content">Content</label>
         <textarea
-          value={draft.content}
+          defaultValue={draft?.content}
           id="content"
           name="content"
           rows={8}
@@ -107,7 +100,7 @@ export default function NoteForm() {
       <div className={css.formGroup}>
         <label htmlFor="tag">Tag</label>
         <select
-          value={draft.tag}
+          defaultValue={draft?.tag}
           id="tag"
           name="tag"
           className={css.select}
@@ -123,17 +116,13 @@ export default function NoteForm() {
       </div>
 
       <div className={css.actions}>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className={css.cancelButton}
-        >
+        <button type="button" onClick={() => router.back()} className={css.cancelButton}>
           Cancel
         </button>
         <button type="submit" className={css.submitButton}>
           {isSubmitting || (addNewNote.isPending && !addNewNote.isSuccess)
-            ? "Creating note..."
-            : "Create note"}
+            ? 'Creating note...'
+            : 'Create note'}
         </button>
       </div>
     </form>

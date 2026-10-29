@@ -1,42 +1,41 @@
-"use client";
-import { fetchNotes } from "@/lib/api/clientApi";
-import NoteList from "@/components/NoteList/NoteList";
-import Pagination from "@/components/Pagination/Pagination";
-import SearchBox from "@/components/SearchBox/SearchBox";
-import css from "./NotesPage.module.css";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { useState } from "react";
-import { useDebounce } from "use-debounce";
-import { Note } from "@/types/note";
-import { useRouter } from "next/navigation";
+'use client';
+import { fetchNotes } from '@/lib/api/clientApi';
+import NoteList from '@/components/NoteList/NoteList';
+import Pagination from '@/components/Pagination/Pagination';
+import SearchBox from '@/components/SearchBox/SearchBox';
+import css from './NotesPage.module.css';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useDebounce } from 'use-debounce';
+import { Note } from '@/types/note';
+import { useRouter } from 'next/navigation';
 
 interface NotesClientProps {
   initialResponse: {
-    notes: Note[];
-    totalPages: number;
-  };
-  tag: string | undefined;
+    notes: Note[],
+    totalPages: number
+  }
+  tag: string | undefined,
 }
 
-export default function NotesClient({
-  initialResponse,
-  tag,
-}: NotesClientProps) {
+
+export default function NotesClient({initialResponse, tag} : NotesClientProps) {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [query, setQuery] = useState<string>("");
+  const [query, setQuery] = useState<string>('');
   const [debouncedQuery] = useDebounce<string>(query, 1000);
 
   const loadNotes = useQuery({
-    queryKey: ["Notes", debouncedQuery, currentPage, tag],
+    queryKey: ['Notes', debouncedQuery, currentPage, tag],
     queryFn: () => fetchNotes(debouncedQuery, currentPage, tag),
     initialData: initialResponse,
     placeholderData: keepPreviousData,
     refetchOnMount: true,
-  });
+    });
 
-  const router = useRouter();
-  const createNotePage = () => router.push("/notes/action/create");
-
+    const router = useRouter();
+    const createNotePage = () => router.push('/notes/action/create');
+  
+ 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -46,7 +45,7 @@ export default function NotesClient({
     setQuery(query);
     setCurrentPage(1);
   };
-
+  
   if (loadNotes.isError) {
     throw new Error();
   }
@@ -62,7 +61,7 @@ export default function NotesClient({
             currentPage={currentPage}
           />
         )}
-        <button type="button" className={css.button} onClick={createNotePage}>
+        <button type='button' className={css.button} onClick={createNotePage}>
           Create note +
         </button>
       </header>

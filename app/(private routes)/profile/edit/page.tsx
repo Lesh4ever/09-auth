@@ -1,10 +1,11 @@
-"use client";
-import Image from "next/image";
-import css from "./EditProfilePage.module.css";
-import { useAuthStore } from "@/lib/store/authStore";
-import { useRouter } from "next/navigation";
-import { editUser, type NewUserData, getMe } from "@/lib/api/clientApi";
-import { useState } from "react";
+'use client';
+import Image from 'next/image';
+import css from './EditProfilePage.module.css';
+import { useAuthStore } from '@/lib/store/authStore';
+import { useRouter } from 'next/navigation';
+import { editUser, type NewUserData, getMe } from '@/lib/api/clientApi';
+import { useState } from 'react';
+
 
 type NewName = {
   username: string;
@@ -12,12 +13,12 @@ type NewName = {
 
 export default function EditProfile() {
   const router = useRouter();
-  const { user, setUser } = useAuthStore();
+    const { user, setUser } = useAuthStore();
   const handleCancel = () => router.back();
-  const [error, setError] = useState<boolean>(false);
-  const avatarUrl = user ? user.avatar : "/avatar.webp";
+    const [error, setError] = useState<boolean>(false);
+    const avatarUrl = user ? user.avatar : '/avatar.webp';
   const handleSubmit = async (formData: FormData) => {
-    const { username } = Object.fromEntries(formData) as NewName;
+      const { username } = Object.fromEntries(formData) as NewName;
     try {
       if (user) {
         const newData: NewUserData = {
@@ -25,10 +26,10 @@ export default function EditProfile() {
           username,
         };
         await editUser(newData);
-        setError(false);
-        const updatedUser = await getMe();
-        setUser(updatedUser);
-        router.push("/profile");
+          setError(false);
+          const updatedUser = await getMe();
+          setUser(updatedUser);
+        router.push('/profile');
       }
     } catch {
       setError(true);
@@ -51,29 +52,16 @@ export default function EditProfile() {
           <div className={css.usernameWrapper}>
             <label htmlFor="username">Username:</label>
             <input
-              defaultValue={user?.username}
-              id="username"
-              type="text"
-              name="username"
-              className={css.input}
-            />
+            defaultValue={user?.username}  id="username" type="text" name="username" className={css.input} />
           </div>
 
           <p>Email: {user?.email}</p>
-          {error && (
-            <p className={css.error}>
-              Something went wrong... please try again
-            </p>
-          )}
+          {error && <p className={css.error}>Something went wrong... please try again</p>}
           <div className={css.actions}>
             <button type="submit" className={css.saveButton}>
               Save
             </button>
-            <button
-              type="button"
-              onClick={handleCancel}
-              className={css.cancelButton}
-            >
+            <button type="button" onClick={handleCancel} className={css.cancelButton}>
               Cancel
             </button>
           </div>

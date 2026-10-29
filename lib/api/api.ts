@@ -1,23 +1,23 @@
 import axios from "axios";
-import type { Note } from "../../types/note";
+import type { Note} from "../../types/note";
 
 export const nextServer = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL + "/api",
+baseURL: process.env.NEXT_PUBLIC_API_URL + '/api',
   withCredentials: true,
 });
 
 export type GetNotesRequest = {
-  params: {
-    search?: string;
-    tag?: string;
-    page: number;
-    perPage: number;
-    sortBy?: string;
-  };
+    params: {
+        search?: string;
+        tag?: string;
+        page: number;
+        perPage: number;
+        sortBy?: string;
+  }
   withCredentials?: boolean;
-  headers?: {
-    Cookie: string;
-  };
+    headers?: {
+        Cookie: string;
+  }
 };
 
 export type GetNotesResponse = {
@@ -27,4 +27,4 @@ export type GetNotesResponse = {
 
 export type ServerBoolResponse = {
   success: boolean;
-};
+}

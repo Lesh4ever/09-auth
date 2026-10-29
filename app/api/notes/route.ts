@@ -49,3 +49,4 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ error: "Failed to create note" }, { status: 500 });
 }
+
