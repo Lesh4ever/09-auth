@@ -1,10 +1,9 @@
 'use client';
 import { register, RegisterRequest, getMe } from '@/lib/api/clientApi';
-import css from './SingUpPage.module.css';
+import css from './SignUpPage.module.css';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
-
 
 export default function Register() {
   const router = useRouter();
