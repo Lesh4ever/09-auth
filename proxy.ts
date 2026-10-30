@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { parse } from 'cookie';
+import { parseSetCookie } from 'cookie';
 import { checkServerSession } from './lib/api/serverApi';
 
 const privateRoutes = ['/profile', '/notes'];
@@ -21,7 +21,7 @@ export async function proxy(request: NextRequest) {
 
   if (accessToken) {
     if (isPublicRoute) {
-      return NextResponse.redirect(new URL('/profile', request.url));
+      return NextResponse.redirect(new URL('/', request.url));
     }
 
     return NextResponse.next();
@@ -42,64 +42,54 @@ export async function proxy(request: NextRequest) {
     if (setCookie) {
       const cookieArray = Array.isArray(setCookie) ? setCookie : [setCookie];
 
-      const renewedCookies: {
-        name: string;
-        value: string;
-        path: string;
-        expires?: Date;
-        maxAge?: number;
-      }[] = [];
+      const parsedCookies = cookieArray.map((cookieStr) => parseSetCookie(cookieStr));
 
-      for (const cookieStr of cookieArray) {
-        const parsed = parse(cookieStr);
-
-        for (const name of ['accessToken', 'refreshToken']) {
-          const value = parsed[name];
-
-          if (value) {
-            const expires = parsed.Expires ? new Date(parsed.Expires) : undefined;
-
-            const maxAge = parsed['Max-Age'] ? Number(parsed['Max-Age']) : undefined;
-
-            renewedCookies.push({
-              name,
-              value,
-              path: parsed.Path || '/',
-              expires: expires && !isNaN(expires.getTime()) ? expires : undefined,
-              maxAge: maxAge !== undefined && Number.isFinite(maxAge) ? maxAge : undefined,
-            });
-          }
-        }
-      }
-
-      const hasNewAccessToken = renewedCookies.some((cookie) => cookie.name === 'accessToken');
+      const hasNewAccessToken = parsedCookies.some(
+        (cookie) => cookie.name === 'accessToken' && !!cookie.value
+      );
 
       if (hasNewAccessToken) {
-        for (const cookie of renewedCookies) {
-          request.cookies.set(cookie.name, cookie.value);
+        const requestHeaders = new Headers(request.headers);
+
+        const cookieValues = new Map(
+          request.cookies.getAll().map(({ name, value }) => [name, value])
+        );
+
+        for (const cookie of parsedCookies) {
+          if (cookie.value === undefined) continue;
+
+          cookieValues.set(cookie.name, cookie.value);
         }
+        requestHeaders.set(
+          'cookie',
+          Array.from(cookieValues)
+            .map(([name, value]) => `${name}=${encodeURIComponent(value)}`)
+            .join('; ')
+        );
 
         const response = isPublicRoute
-          ? NextResponse.redirect(new URL('/profile', request.url))
+          ? NextResponse.redirect(new URL('/', request.url))
           : NextResponse.next({
               request: {
-                headers: new Headers(request.headers),
+                headers: requestHeaders,
               },
             });
 
-        for (const cookie of renewedCookies) {
+        for (const cookie of parsedCookies) {
+          if (cookie.value === undefined) continue;
+
           response.cookies.set({
             ...cookie,
-            httpOnly: true,
-            secure: request.nextUrl.protocol === 'https:',
-            sameSite: 'lax',
+            value: cookie.value,
           });
         }
 
         return response;
       }
     }
-  } catch {}
+  } catch {
+    console.error('Session refresh failed');
+  }
 
   if (isPrivateRoute) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
