@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import css from './NoteForm.module.css';
 import { type NoteFormData } from '@/types/note';
@@ -7,6 +8,7 @@ import { createNote } from '@/lib/api/clientApi';
 import { useRouter } from 'next/navigation';
 import * as Yup from 'yup';
 import { useNoteDraftStore } from '@/lib/store/noteStore';
+
 const NoteFormSchema = Yup.object().shape({
   title: Yup.string()
     .min(3, 'Too short title, min 3 symbols')
@@ -19,49 +21,65 @@ const NoteFormSchema = Yup.object().shape({
 export default function NoteForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
+
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { draft, setDraft, clearDraft } = useNoteDraftStore();
 
   const addNewNote = useMutation({
     mutationFn: (newNoteData: NoteFormData) => createNote(newNoteData),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['Notes'] });
       clearDraft();
-      router.back();
-      localStorage.removeItem('note draft');
+      router.push('/notes/filter/all');
+    },
+
+    onError: (error) => {
+      console.error('Failed to create note:', error);
+      setErrors({
+        submit: 'Failed to create note. Please try again.',
+      });
     },
   });
-
-  const { draft, setDraft, clearDraft } = useNoteDraftStore();
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    setDraft({ ...draft, [event.target.name]: event.target.value });
+    setDraft({
+      ...draft,
+      [event.target.name]: event.target.value,
+    });
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrors({});
+
     const formData = new FormData(event.currentTarget);
+
     const values: NoteFormData = {
       title: formData.get('title') as string,
       content: formData.get('content') as string,
-      tag: formData.get('tag') as 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping',
+      tag: formData.get('tag') as NoteFormData['tag'],
     };
 
     try {
-      await NoteFormSchema.validate(values, { abortEarly: false });
-      setIsSubmitting(true);
+      await NoteFormSchema.validate(values, {
+        abortEarly: false,
+      });
+
       addNewNote.mutate(values);
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const newErrors: Record<string, string> = {};
+
         err.inner.forEach((error) => {
           if (error.path) {
             newErrors[error.path] = error.message;
           }
         });
+
         setErrors(newErrors);
       } else {
         console.error('Unexpected error:', err);
@@ -77,7 +95,7 @@ export default function NoteForm() {
           id="title"
           type="text"
           name="title"
-          defaultValue={draft?.title}
+          value={draft.title}
           className={css.input}
           onChange={handleChange}
         />
@@ -87,7 +105,7 @@ export default function NoteForm() {
       <div className={css.formGroup}>
         <label htmlFor="content">Content</label>
         <textarea
-          defaultValue={draft?.content}
+          value={draft.content}
           id="content"
           name="content"
           rows={8}
@@ -100,7 +118,7 @@ export default function NoteForm() {
       <div className={css.formGroup}>
         <label htmlFor="tag">Tag</label>
         <select
-          defaultValue={draft?.tag}
+          value={draft.tag}
           id="tag"
           name="tag"
           className={css.select}
@@ -115,14 +133,15 @@ export default function NoteForm() {
         {errors.tag && <div className={css.error}>{errors.tag}</div>}
       </div>
 
+      {errors.submit && <p className={css.error}>{errors.submit}</p>}
+
       <div className={css.actions}>
         <button type="button" onClick={() => router.back()} className={css.cancelButton}>
           Cancel
         </button>
-        <button type="submit" className={css.submitButton}>
-          {isSubmitting || (addNewNote.isPending && !addNewNote.isSuccess)
-            ? 'Creating note...'
-            : 'Create note'}
+
+        <button type="submit" className={css.submitButton} disabled={addNewNote.isPending}>
+          {addNewNote.isPending ? 'Creating note...' : 'Create note'}
         </button>
       </div>
     </form>
