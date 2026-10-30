@@ -1,4 +1,5 @@
 'use client';
+
 import { fetchNotes } from '@/lib/api/clientApi';
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
@@ -7,19 +8,18 @@ import css from './NotesPage.module.css';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useDebounce } from 'use-debounce';
-import { Note } from '@/types/note';
-import { useRouter } from 'next/navigation';
+import type { Note } from '@/types/note';
+import Link from 'next/link';
 
 interface NotesClientProps {
   initialResponse: {
-    notes: Note[],
-    totalPages: number
-  }
-  tag: string | undefined,
+    notes: Note[];
+    totalPages: number;
+  };
+  tag: string | undefined;
 }
 
-
-export default function NotesClient({initialResponse, tag} : NotesClientProps) {
+export default function NotesClient({ initialResponse, tag }: NotesClientProps) {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [query, setQuery] = useState<string>('');
   const [debouncedQuery] = useDebounce<string>(query, 1000);
@@ -30,12 +30,8 @@ export default function NotesClient({initialResponse, tag} : NotesClientProps) {
     initialData: initialResponse,
     placeholderData: keepPreviousData,
     refetchOnMount: true,
-    });
+  });
 
-    const router = useRouter();
-    const createNotePage = () => router.push('/notes/action/create');
-  
- 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -45,7 +41,7 @@ export default function NotesClient({initialResponse, tag} : NotesClientProps) {
     setQuery(query);
     setCurrentPage(1);
   };
-  
+
   if (loadNotes.isError) {
     throw new Error();
   }
@@ -54,6 +50,7 @@ export default function NotesClient({initialResponse, tag} : NotesClientProps) {
     <div className={css.app}>
       <header className={css.toolbar}>
         <SearchBox onChange={onChangeQuery} value={query} />
+
         {loadNotes.isSuccess && loadNotes.data.totalPages > 1 && (
           <Pagination
             pageCount={loadNotes.data.totalPages}
@@ -61,10 +58,12 @@ export default function NotesClient({initialResponse, tag} : NotesClientProps) {
             currentPage={currentPage}
           />
         )}
-        <button type='button' className={css.button} onClick={createNotePage}>
+
+        <Link href="/notes/action/create" className={css.button}>
           Create note +
-        </button>
+        </Link>
       </header>
+
       {loadNotes.isSuccess && <NoteList notes={loadNotes.data.notes} />}
     </div>
   );
